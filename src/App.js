@@ -134,18 +134,18 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "auto", fontFamily: "sans-serif" }}>
-      <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1rem" }}>Tabba</h1>
+    <div style={{ padding: "1rem", maxWidth: "1000px", margin: "auto", fontFamily: "sans-serif" }}>
+      <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1rem", textAlign: "center" }}>Tabba</h1>
 
       <input
         type="text"
         value={tabName}
         onChange={(e) => setTabName(e.target.value)}
         placeholder="Tab Name"
-        style={{ width: "100%", padding: "0.5rem", fontSize: "1rem", marginBottom: "1rem" }}
+        style={{ width: "100%", padding: "0.75rem", fontSize: "1rem", marginBottom: "1rem", boxSizing: "border-box" }}
       />
 
-      <button onClick={toggleInstrument} style={{ marginBottom: "1rem" }}>
+      <button onClick={toggleInstrument} style={{ marginBottom: "1rem", padding: "0.5rem 1rem", fontSize: "1rem" }}>
         Switch to {instrument === "guitar" ? "Bass" : "Guitar"}
       </button>
 
@@ -154,7 +154,7 @@ export default function App() {
         value={tabData[instrument].title}
         onChange={updateTitle}
         placeholder="Part Label (e.g. Clean Guitar)"
-        style={{ width: "100%", padding: "0.5rem", fontSize: "1rem", marginBottom: "1rem" }}
+        style={{ width: "100%", padding: "0.75rem", fontSize: "1rem", marginBottom: "1rem", boxSizing: "border-box" }}
       />
 
       <textarea
@@ -165,14 +165,18 @@ export default function App() {
           width: "100%",
           height: "400px",
           fontFamily: "monospace",
-          fontSize: "0.9rem",
+          fontSize: "0.95rem",
           padding: "1rem",
           whiteSpace: "pre",
+          boxSizing: "border-box",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          background: "#fff",
         }}
         placeholder="Start writing your tab here..."
       />
 
-      <div style={{ marginTop: "1rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+      <div style={{ marginTop: "1rem", display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
         <button onClick={handleClear}>Reset Tab</button>
         <button onClick={handleCopy}>Copy</button>
         <button onClick={handleDownload}>Download</button>
@@ -182,7 +186,7 @@ export default function App() {
       <div style={{ marginTop: "2rem" }}>
         <h2>Saved Tabs</h2>
         {Object.keys(savedTabs).length === 0 && <p>No saved tabs yet.</p>}
-        <ul>
+        <ul style={{ padding: 0, listStyle: "none" }}>
           {Object.keys(savedTabs).map((name) => (
             <li key={name} style={{ marginBottom: "0.5rem" }}>
               <strong>{name}</strong>
