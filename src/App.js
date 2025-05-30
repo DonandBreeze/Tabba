@@ -4,7 +4,12 @@ export default function App() {
   const defaultGuitarStrings = ["e|", "B|", "G|", "D|", "A|", "E|"];
   const defaultBassStrings = ["G|", "D|", "A|", "E|"];
 
-  const generateRow = (stringLabels) => stringLabels.map(label => `${label}--------------------------------------------------`).join("\n");
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+  const generateRow = (stringLabels) =>
+    stringLabels
+      .map(label => `${label}${"-".repeat(isMobile ? 36 : 50)}`)
+      .join("\n");
 
   const [tabData, setTabData] = useState(() => {
     const saved = localStorage.getItem("tabData");
@@ -23,15 +28,11 @@ export default function App() {
     return saved ? JSON.parse(saved) : {};
   });
 
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-
   useEffect(() => {
     localStorage.setItem("tabData", JSON.stringify(tabData));
     localStorage.setItem("tabName", tabName);
     localStorage.setItem("savedTabs", JSON.stringify(savedTabs));
   }, [tabData, tabName, savedTabs]);
-
-  const getCurrent = () => tabData[instrument];
 
   const extractStringLabels = (content) => {
     const lines = content.split("\n").slice(0, instrument === "guitar" ? 6 : 4);
@@ -40,7 +41,7 @@ export default function App() {
 
   const addNewRow = () => {
     const labels = extractStringLabels(tabData[instrument].content);
-    const newRow = "\n\n" + labels.map(label => `${label}--------------------------------------------------`).join("\n");
+    const newRow = "\n\n" + labels.map(label => `${label}${"-".repeat(isMobile ? 36 : 50)}`).join("\n");
     setTabData({
       ...tabData,
       [instrument]: {
@@ -48,6 +49,20 @@ export default function App() {
         content: tabData[instrument].content + newRow,
       },
     });
+  };
+
+  const deleteLastRow = () => {
+    const blocks = tabData[instrument].content.trim().split(/\n\s*\n/);
+    if (blocks.length > 1) {
+      blocks.pop();
+      setTabData({
+        ...tabData,
+        [instrument]: {
+          ...tabData[instrument],
+          content: blocks.join("\n\n"),
+        },
+      });
+    }
   };
 
   const handleTabChange = (e) => {
@@ -61,24 +76,18 @@ export default function App() {
     const isEnter = e.key === "Enter";
     const isBackspace = e.key === "Backspace";
 
-    if (isEnter && e.shiftKey) {
+    if (!isMobile && isEnter && !e.shiftKey) {
       e.preventDefault();
       addNewRow();
     }
 
+    if (isEnter && e.shiftKey) {
+      return; // Allow shift+enter for line break
+    }
+
     if (isBackspace && e.ctrlKey) {
       e.preventDefault();
-      const blocks = tabData[instrument].content.trim().split(/\n\s*\n/);
-      if (blocks.length > 1) {
-        blocks.pop();
-        setTabData({
-          ...tabData,
-          [instrument]: {
-            ...tabData[instrument],
-            content: blocks.join("\n\n"),
-          },
-        });
-      }
+      deleteLastRow();
     }
   };
 
@@ -185,8 +194,16 @@ export default function App() {
         placeholder="Start writing your tab here..."
       />
 
-      {isMobile && (
-        <button onClick={addNewRow} style={{ marginTop: "1rem" }}>+ Add Tab Row</button>
+      {isMobile ? (
+        <>
+          <button onClick={addNewRow} style={{ marginTop: "1rem" }}>+ Add Tab Row</button>
+          <button onClick={deleteLastRow} style={{ marginTop: "1rem" }}>Delete Last Row</button>
+        </>
+      ) : (
+        <>
+          <button onClick={addNewRow} style={{ marginTop: "1rem", marginRight: "1rem" }}>+ Add Tab Row</button>
+          <button onClick={deleteLastRow} style={{ marginTop: "1rem" }}>Delete Last Row</button>
+        </>
       )}
 
       <div style={{ marginTop: "1rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
@@ -214,9 +231,9 @@ export default function App() {
         <div style={{ marginTop: "2rem", backgroundColor: "#f0f0f0", padding: "1rem", borderRadius: "0.5rem" }}>
           <h2 style={{ fontSize: "1.2rem", marginBottom: "0.5rem" }}>Keyboard Shortcuts:</h2>
           <ul style={{ margin: 0, paddingLeft: "1.2rem", lineHeight: "1.6" }}>
-            <li><strong>Shift + Enter</strong> – Add new tab row ({instrument === "guitar" ? 6 : 4} strings)</li>
-            <li><strong>Enter</strong> – Add manual line break</li>
-            <li><strong>Ctrl + Backspace</strong> – Delete last full tab row</li>
+            <li><strong>Enter</strong> – Add new tab row ({instrument === "guitar" ? 6 : 4} strings)</li>
+            <li><strong>Shift + Enter</strong> – Manual line break</li>
+            <li><strong>Ctrl + Backspace</strong> – Delete last tab row</li>
           </ul>
         </div>
       )}
